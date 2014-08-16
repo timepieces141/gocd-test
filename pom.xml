@@ -17,6 +17,8 @@
   </dependencies>
   <build>
     <plugins>
+      
+      <!--  Compiler plugin  -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -26,11 +28,15 @@
           <target>1.7</target>
         </configuration>
       </plugin>
+
+      <!--  Versions plugin allows dynamic versioning  -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
         <version>2.1</version>
       </plugin>
+
+      <!--  Clean the go output directory  -->
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
         <version>2.5</version>
@@ -46,6 +52,30 @@
           </filesets>
         </configuration>
       </plugin>
+
+      <!--  Fake creating go files in go output directory  -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.3.2</version>
+        <executions>
+          <execution>
+            <id>Generate-Go-Files</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>compile</phase>
+            <configuration>
+              <executable>touch</executable>
+              <arguments>
+                <argument>foo.go</argument>
+              </arguments>
+              <workingDirectory>go/${env.GO_OUTPUT_DIR}</workingDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
 </project>
