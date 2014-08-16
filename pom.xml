@@ -45,7 +45,7 @@
             <fileset>
               <directory>go/${env.GO_OUTPUT_DIR}</directory>
               <excludes>
-                <exclude>.git</exclude>
+                <exclude>.git/*</exclude>
               </excludes>
               <followSymlinks>false</followSymlinks>
             </fileset>
