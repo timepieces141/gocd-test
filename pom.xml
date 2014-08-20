@@ -1,12 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <url>http://maven.apache.org</url>
+
   <groupId>com.petersen.cd</groupId>
   <artifactId>gocd-test</artifactId>
   <packaging>jar</packaging>
   <version>0.0.1-SNAPSHOT</version>
   <name>gocd-test</name>
-  <url>http://maven.apache.org</url>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -15,6 +17,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
   <build>
     <plugins>
       
@@ -37,7 +40,7 @@
       </plugin>
 
       <!--  Clean the go output directory  -->
-      <plugin>
+<!--       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
         <version>2.5</version>
         <configuration>
@@ -52,13 +55,30 @@
           </filesets>
         </configuration>
       </plugin>
+ -->
 
-      <!--  Fake creating go files in go output directory  -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.3.2</version>
         <executions>
+
+          <!--  Remove any old generated Go files using Git, if they exist  -->
+          <execution>
+            <id>Remove-Go-Files</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>clean</phase>
+            <configuration>
+              <executable>scripts/flush_old.sh</executable>
+              <arguments>
+                <argument>go/${env.GO_OUTPUT_DIR}</argument>
+              </arguments>
+            </configuration>
+          </execution>
+
+          <!--  Generate Go files  -->
           <execution>
             <id>Generate-Go-Files</id>
             <goals>
@@ -66,11 +86,26 @@
             </goals>
             <phase>compile</phase>
             <configuration>
-              <executable>touch</executable>
+              <executable>scripts/generate_go_code.sh</executable>
               <arguments>
-                <argument>foo.go</argument>
+                <argument>go/${env.GO_OUTPUT_DIR}</argument>
               </arguments>
-              <workingDirectory>go/${env.GO_OUTPUT_DIR}</workingDirectory>
+<!--              <workingDirectory></workingDirectory>-->
+            </configuration>
+          </execution>
+
+          <!--  commit and push the generated Go code  -->
+          <execution>
+            <id>Push-Go-Files</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>deploy</phase>
+            <configuration>
+              <executable>scripts/push_new.sh</executable>
+              <arguments>
+                <argument>go/${env.GO_OUTPUT_DIR}</argument>
+              </arguments>
             </configuration>
           </execution>
         </executions>
@@ -78,4 +113,17 @@
 
     </plugins>
   </build>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <local.test.repository>file:///home/epeters/repository/maven-repository/</local.test.repository>
+  </properties>
+
+  <!--  Distribution  -->
+  <distributionManagement>
+    <repository>
+      <id>local-test</id>
+      <url>${local.test.repository}</url>
+    </repository>
+  </distributionManagement>
 </project>
