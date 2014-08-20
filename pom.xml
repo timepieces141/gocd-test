@@ -116,7 +116,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <local.test.repository>file:///home/epeters/repository/maven-repository/</local.test.repository>
+    <local.test.repository>file:///tmp/maven/repository/maven-repository/</local.test.repository>
   </properties>
 
   <!--  Distribution  -->
