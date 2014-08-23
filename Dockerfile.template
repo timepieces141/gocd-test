@@ -1,0 +1,43 @@
+# px-luna service (dynamically generated)
+# 
+# VERSION <<VERSION>>
+# 
+# This dockerfile was built dynamically by the GoCD server. It was then
+# executed producing the docker image. The image was then pushed to the docker
+# registry. Before executing this dockerfile, you might want to check that the
+# image is not already available in the registry. Do not push an image
+# manually generated using this dockerfile to the registry unless the image
+# does not already exist, or you know you are doing. You have been warned!
+#
+
+FROM <<DOCKER_BASE>>
+MAINTAINER Plan X Core Team core@px.ftw
+
+# install java
+WORKDIR /tmp
+RUN wget <<JAVA_ARTIFACT>> 
+RUN tar -mxzf /tmp/<<JAVA_TARBALL>> -C /usr/local
+RUN update-alternatives --install /usr/bin/java java /usr/local/<<JAVA_VERSION>>/jre/bin/java 1000
+RUN update-alternatives --auto java
+
+# install px-luna
+RUN wget http://artifactory.px.net:8081/artifactory/repos/px/px-luna/<<VERSION>>/px-luna-<<VERSION>>-bin.tar.gz
+RUN mkdir -p /opt/planx/core/px-luna-<<VERSION>>
+RUN tar -mxzf /tmp/px-luna-<<VERSION>>-bin.tar.gz -C /opt/planx/core/px-luna-<<VERSION>> --strip-components=1
+RUN ln -s /opt/planx/core/px-luna-<<VERSION>> /opt/planx/core/px-luna
+
+#######################
+#      TEMPORARY      #
+#######################
+# use an in-memory database
+RUN sed -i 's/#px.core.data.blobstore.impl = px.core.data.blob.MemoryBlobProvider/px.core.data.blobstore.impl = px.core.data.blob.MemoryBlobProvider/g' /opt/planx/core/px-luna/local.properties
+RUN sed -i 's/px.core.data.blobstore.impl = px.core.data.blob.RocksDBBlobProvider/#px.core.data.blobstore.impl = px.core.data.blob.RocksDBBlobProvider/g' /opt/planx/core/px-luna/local.properties
+
+# add supervisord script
+ADD px-luna.conf /etc/supervisor/conf.d/px-luna.conf
+
+# expose port 9090
+EXPOSE 9090
+
+# supervisord command to start the services
+CMD ["/usr/bin/supervisord"]
