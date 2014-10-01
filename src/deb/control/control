@@ -1,0 +1,9 @@
+Package: [[name]]
+Version: [[version]]
+Section: misc
+Priority: optional
+Architecture: all
+Depends: jdk (>= 1.7)
+Maintainer: Edward Petersen <epetersen@px.ftw>
+Description: Example project for building debian package using maven
+Distribution: development
